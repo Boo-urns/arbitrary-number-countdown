@@ -33,19 +33,9 @@ Example:
 
       }
 
-      h1{
-        font-size: 120px;
-        text-transform: uppercase;
-        @apply(--arbitrary-number-countdown-styles);
-
-      }
-      strong {
-        @apply(--arbitrary-number-countdown-strong-styles);
-      }
     </style>
 
-    <span id="remaining"></span>
-    Number Per Second: {{numberPerSecond}}
+    <span id="remaining">{{initialRemaining}}</span>
     <content></content>
 
   </template>
@@ -81,15 +71,7 @@ Example:
       numberPerSecond: Number,
       remaining: String,
 
-      days: {
-        type: Number,
-        observer: 'timeUpdated'
-      },
 
-      hours: {
-        type: Number,
-        observer: 'timeUpdated'
-      },
 
 
     },
@@ -111,20 +93,12 @@ Example:
 
 
       let remaining = this.expiredDate.diff(today, 'seconds') * this.numberPerSecond;
-      this.remaining = remaining.toLocaleString();
+      this.remaining = this.initialRemaining = remaining.toLocaleString();
 
       // Set the Interval
       this.set('interval', setInterval(this.timerStarted.bind(this), 1000));
     },
 
-    attached: function() {
-      // `attached` fires once the element and its parents have been inserted
-      // into a document.
-      //
-      // This is a good place to perform any work related to your element's
-      // visual state or active behavior (measuring sizes, beginning animations,
-      // loading resources, etc).
-    },
 
     detached: function() {
       // The analog to `attached`, `detached` fires when the element has been
@@ -157,37 +131,17 @@ Example:
             suffix : ''
           };
 
-          var animRemaining = new CountUp("remaining", prev, remaining, 0, 1.5, options);
+          var animRemaining = new CountUp("remaining", prev, remaining, 0, 1.25, options);
           animRemaining.start(function() {
-              animRemaining.update(remaining);
+            animRemaining.reset();
           });
 
           this.remaining = remaining.toLocaleString();
         }
-        // for(let i = prev; i > remaining; i - 10) {
-        //     console.log(i);
-        //
-        // }
+
 
     },
 
-    /**
-     * Observer for timer to display plural or singular verbage
-     *
-     */
-    timeUpdated: function() {
-      // if(this.hoursTxt !== undefined) {
-      //   this.hoursTxt.output = this.hours === 1 ? this.hoursTxt.singular : this.hoursTxt.plural;
-      //   this.set('hoursTxt.output', this.hoursTxt.output);
-      // }
-      //
-      // if(this.daysTxt !== undefined) {
-      //   this.daysTxt.output = this.days <= 1 ? this.daysTxt.singular : this.daysTxt.plural;
-      //   this.set('daysTxt.output', this.daysTxt.output);
-      //
-      // }
-
-    },
 
 
   });
