@@ -131,7 +131,7 @@ Example:
             suffix : ''
           };
 
-          var animRemaining = new CountUp("remaining", prev, remaining, 0, 1.25, options);
+          var animRemaining = new CountUp(this.$.remaining, prev, remaining, 0, 1.25, options);
           animRemaining.start(function() {
             animRemaining.reset();
           });
