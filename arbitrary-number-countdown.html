@@ -43,9 +43,8 @@ Example:
       }
     </style>
 
-    <h1><strong>{{days}}</strong> {{daysTxt.output}}
-      <strong>{{hours}}</strong> {{hoursTxt.output}}
-    </h1>
+    <h1>{{remaining}}</h1>
+    Number Per Second: {{numberPerSecond}}
     <content></content>
 
   </template>
@@ -69,9 +68,17 @@ Example:
       },
 
       /**
-       * `eventDate` Event Date Format 'YYYY-MM-DD 10:23'
+       * `expiredDate` Date the countdown hits 0
        */
-      eventDate: String,
+      expiredDate: String,
+
+      /**
+       * `baseNumber` number for 1 complete day.
+       */
+      baseNumber: String,
+
+      numberPerSecond: Number,
+      remaining: String,
 
       days: {
         type: Number,
@@ -83,18 +90,6 @@ Example:
         observer: 'timeUpdated'
       },
 
-      daysTxt: {
-        type: Object,
-        value: function() {
-          return { singular: 'Day', plural: 'Days' };
-        }
-      },
-      hoursTxt: {
-        type: Object,
-        value: function() {
-          return { singular: 'Hour', plural: 'Hours' };
-        }
-      }
 
     },
 
@@ -105,17 +100,20 @@ Example:
     ready: function() {
 
       moment.tz.setDefault(this.timezone);
-      this.eventDate = moment.tz(this.eventDate, this.timezone);
+      this.expiredDate = moment.tz(this.expiredDate, this.timezone);
 
       var today = moment().format();
 
-      this.days  = this.eventDate.diff(today, 'days');
-      this.hours = this.eventDate.diff(today, 'hours') % 24;
+      // calculating the amount per second
+      let perSecond = parseFloat(this.baseNumber) / (60 * 60 * 24); // (seconds * minutes * hours)
+      this.numberPerSecond = perSecond.toFixed();
 
-      this.minutes = this.eventDate.diff(today, 'minutes') - this.eventDate.diff(today, 'hours') * 60;
+
+      let remaining = this.expiredDate.diff(today, 'seconds') * this.numberPerSecond;
+      this.remaining = remaining.toLocaleString();
 
       // Set the Interval
-      this.set('interval', setInterval(this.timerStarted.bind(this), 750));
+      this.set('interval', setInterval(this.timerStarted.bind(this), 500));
     },
 
     attached: function() {
@@ -144,10 +142,8 @@ Example:
     timerStarted: function() {
         var now = moment().format();
 
-        this.days  = this.eventDate.diff(now, 'days');
-        this.hours = this.eventDate.diff(now, 'hours') % 24;
-        this.minutes = this.eventDate.diff(now, 'minutes') - this.eventDate.diff(now, 'hours') * 60;
-
+        let remaining = this.expiredDate.diff(now, 'seconds') * this.numberPerSecond;
+        this.remaining = remaining.toLocaleString();
 
     },
 
@@ -156,16 +152,16 @@ Example:
      *
      */
     timeUpdated: function() {
-      if(this.hoursTxt !== undefined) {
-        this.hoursTxt.output = this.hours === 1 ? this.hoursTxt.singular : this.hoursTxt.plural;
-        this.set('hoursTxt.output', this.hoursTxt.output);
-      }
-
-      if(this.daysTxt !== undefined) {
-        this.daysTxt.output = this.days <= 1 ? this.daysTxt.singular : this.daysTxt.plural;
-        this.set('daysTxt.output', this.daysTxt.output);
-
-      }
+      // if(this.hoursTxt !== undefined) {
+      //   this.hoursTxt.output = this.hours === 1 ? this.hoursTxt.singular : this.hoursTxt.plural;
+      //   this.set('hoursTxt.output', this.hoursTxt.output);
+      // }
+      //
+      // if(this.daysTxt !== undefined) {
+      //   this.daysTxt.output = this.days <= 1 ? this.daysTxt.singular : this.daysTxt.plural;
+      //   this.set('daysTxt.output', this.daysTxt.output);
+      //
+      // }
 
     },
 
