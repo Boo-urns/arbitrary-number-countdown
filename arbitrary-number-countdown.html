@@ -15,14 +15,14 @@ An element providing a solution to no problem in particular.
 
 Example:
 
-    <global-timer></global-timer>
+    <arbitrary-number-countdown></arbitrary-number-countdown>
 
 @group Seed Elements
-@element global-timer
+@element arbitrary-number-countdown
 @demo demo/index.html
 @hero hero.svg
 -->
-<dom-module id="global-timer">
+<dom-module id="arbitrary-number-countdown">
 
   <template>
     <style>
@@ -35,11 +35,11 @@ Example:
       h1{
         font-size: 120px;
         text-transform: uppercase;
-        @apply(--global-timer-styles);
+        @apply(--arbitrary-number-countdown-styles);
 
       }
       strong {
-        @apply(--global-timer-strong-styles);
+        @apply(--arbitrary-number-countdown-strong-styles);
       }
     </style>
 
@@ -56,7 +56,7 @@ Example:
 
   Polymer({
 
-    is: 'global-timer',
+    is: 'arbitrary-number-countdown',
 
     properties: {
 
@@ -136,13 +136,6 @@ Example:
     },
 
     // Element Behavior
-
-    /**
-     * The `global-timer-lasers` event is fired whenever `fireLasers` is called.
-     *
-     * @event global-timer-lasers
-     * @detail {{sound: String}}
-     */
 
     /**
      * Starting timer for those few cases that roll over the hour
