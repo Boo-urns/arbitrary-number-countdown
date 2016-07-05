@@ -10,6 +10,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../polymer/polymer.html">
 
 <link rel="import" href="import-moment.html">
+<link rel="import" href="import-countup.html">
 <!--
 An element providing a solution to no problem in particular.
 
@@ -43,7 +44,7 @@ Example:
       }
     </style>
 
-    <h1>{{remaining}}</h1>
+    <span id="remaining"></span>
     Number Per Second: {{numberPerSecond}}
     <content></content>
 
@@ -113,7 +114,7 @@ Example:
       this.remaining = remaining.toLocaleString();
 
       // Set the Interval
-      this.set('interval', setInterval(this.timerStarted.bind(this), 500));
+      this.set('interval', setInterval(this.timerStarted.bind(this), 1000));
     },
 
     attached: function() {
@@ -143,7 +144,30 @@ Example:
         var now = moment().format();
 
         let remaining = this.expiredDate.diff(now, 'seconds') * this.numberPerSecond;
-        this.remaining = remaining.toLocaleString();
+        let prev      = parseInt(this.get('remaining').replace(/,/g, '')); // convert string output to number
+
+        if(remaining !== prev) {
+
+          var options = {
+            useEasing : false,
+            useGrouping : true,
+            separator : ',',
+            decimal : '.',
+            prefix : '',
+            suffix : ''
+          };
+
+          var animRemaining = new CountUp("remaining", prev, remaining, 0, 1.5, options);
+          animRemaining.start(function() {
+              animRemaining.update(remaining);
+          });
+
+          this.remaining = remaining.toLocaleString();
+        }
+        // for(let i = prev; i > remaining; i - 10) {
+        //     console.log(i);
+        //
+        // }
 
     },
 
