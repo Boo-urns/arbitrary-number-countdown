@@ -12,11 +12,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="import-moment.html">
 <link rel="import" href="import-countup.html">
 <!--
-An element providing a solution to no problem in particular.
+Create a countdown based on _____ for one full day. Adjusts based on timezone with moment.js
 
 Example:
 
-    <arbitrary-number-countdown></arbitrary-number-countdown>
+      <arbitrary-number-countdown base-number="47766199.87" timezone="America/Los_Angeles" expired-date="2016-09-26 09:00"></arbitrary-number-countdown>
 
 @group Seed Elements
 @element arbitrary-number-countdown
@@ -120,8 +120,12 @@ Example:
         let remaining = this.expiredDate.diff(now, 'seconds') * this.numberPerSecond;
         let prev      = parseInt(this.get('remaining').replace(/,/g, '')); // convert string output to number
 
-        if(remaining !== prev) {
+        if(remaining <= 0) {
+          clearInterval(this.get('interval'));
+          this.fire('number-countdown', {expired: true});
+        }
 
+        if(remaining !== prev) {
           var options = {
             useEasing : false,
             useGrouping : true,
@@ -133,10 +137,13 @@ Example:
 
           var animRemaining = new CountUp(this.$.remaining, prev, remaining, 0, 1.25, options);
           animRemaining.start(function() {
-            animRemaining.reset();
+            if(remaining !== 0) {
+              animRemaining.reset();
+            }
           });
 
           this.remaining = remaining.toLocaleString();
+
         }
 
 
