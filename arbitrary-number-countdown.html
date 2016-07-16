@@ -44,113 +44,105 @@ Example:
 
 <script>
 
-  Polymer({
+'use strict';
 
-    is: 'arbitrary-number-countdown',
+Polymer({
 
-    properties: {
+is: 'arbitrary-number-countdown',
 
-      /**
-       * `timezone` not UTC specific Moment.js data. Example America/Los_Angeles
-       */
-      timezone: {
-        type: String,
-        value: function() { return 'America/Los_Angeles'; }
-      },
+properties: {
 
-      /**
-       * `expiredDate` Date the countdown hits 0
-       */
-      expiredDate: String,
+  /**
+   * `timezone` not UTC specific Moment.js data. Example America/Los_Angeles
+   */
+  timezone: {
+    type: String,
+    value: function value() {
+      return 'America/Los_Angeles';
+    }
+  },
 
-      /**
-       * `baseNumber` number for 1 complete day.
-       */
-      baseNumber: String,
+  /**
+   * `expiredDate` Date the countdown hits 0
+   */
+  expiredDate: String,
 
-      numberPerSecond: Number,
-      remaining: String,
+  /**
+   * `baseNumber` number for 1 complete day.
+   */
+  baseNumber: String,
 
+  numberPerSecond: Number,
+  remaining: String
 
+},
 
+// Element Lifecycle
 
-    },
+ready: function ready() {
 
+  moment.tz.setDefault(this.timezone);
+  this.expiredDate = moment.tz(this.expiredDate, this.timezone);
 
+  var today = moment().format();
 
-    // Element Lifecycle
+  // calculating the amount per second
+  var perSecond = parseFloat(this.baseNumber) / (60 * 60 * 24); // (seconds * minutes * hours)
+  this.numberPerSecond = perSecond.toFixed();
 
-    ready: function() {
+  var remaining = this.expiredDate.diff(today, 'seconds') * this.numberPerSecond;
+  this.remaining = this.initialRemaining = remaining.toLocaleString();
 
-      moment.tz.setDefault(this.timezone);
-      this.expiredDate = moment.tz(this.expiredDate, this.timezone);
+  // Set the Interval
+  this.set('interval', setInterval(this.timerStarted.bind(this), 1000));
+},
 
-      var today = moment().format();
+detached: function detached() {
+  // The analog to `attached`, `detached` fires when the element has been
+  // removed from a document.
+  //
+  // Use this to clean up anything you did in `attached`.
+  clearInterval(this.get('interval'));
+},
 
-      // calculating the amount per second
-      let perSecond = parseFloat(this.baseNumber) / (60 * 60 * 24); // (seconds * minutes * hours)
-      this.numberPerSecond = perSecond.toFixed();
+// Element Behavior
 
+/**
+ * Starting timer for those few cases that roll over the hour
+ *
+ */
+timerStarted: function timerStarted() {
+  var now = moment().format();
 
-      let remaining = this.expiredDate.diff(today, 'seconds') * this.numberPerSecond;
-      this.remaining = this.initialRemaining = remaining.toLocaleString();
+  var remaining = this.expiredDate.diff(now, 'seconds') * this.numberPerSecond;
+  var prev = parseInt(this.get('remaining').replace(/,/g, '')); // convert string output to number
 
-      // Set the Interval
-      this.set('interval', setInterval(this.timerStarted.bind(this), 1000));
-    },
+  if (remaining <= 0) {
+    clearInterval(this.get('interval'));
+    this.fire('number-countdown', { expired: true });
+  }
 
+  if (remaining !== prev) {
+    var options = {
+      useEasing: false,
+      useGrouping: true,
+      separator: ',',
+      decimal: '.',
+      prefix: '',
+      suffix: ''
+    };
 
-    detached: function() {
-      // The analog to `attached`, `detached` fires when the element has been
-      // removed from a document.
-      //
-      // Use this to clean up anything you did in `attached`.
-      clearInterval(this.get('interval'));
-    },
+    var animRemaining = new CountUp(this.$.remaining, prev, remaining, 0, 1.25, options);
+    animRemaining.start(function () {
+      if (remaining !== 0) {
+        animRemaining.reset();
+      }
+    });
 
-    // Element Behavior
+    this.remaining = remaining.toLocaleString();
+  }
+}
 
-    /**
-     * Starting timer for those few cases that roll over the hour
-     *
-     */
-    timerStarted: function() {
-        var now = moment().format();
-
-        let remaining = this.expiredDate.diff(now, 'seconds') * this.numberPerSecond;
-        let prev      = parseInt(this.get('remaining').replace(/,/g, '')); // convert string output to number
-
-        if(remaining <= 0) {
-          clearInterval(this.get('interval'));
-          this.fire('number-countdown', {expired: true});
-        }
-
-        if(remaining !== prev) {
-          var options = {
-            useEasing : false,
-            useGrouping : true,
-            separator : ',',
-            decimal : '.',
-            prefix : '',
-            suffix : ''
-          };
-
-          var animRemaining = new CountUp(this.$.remaining, prev, remaining, 0, 1.25, options);
-          animRemaining.start(function() {
-            if(remaining !== 0) {
-              animRemaining.reset();
-            }
-          });
-
-          this.remaining = remaining.toLocaleString();
-
-        }
-
-
-    },
-
-
-
-  });
+});
 
 </script>
